@@ -14,6 +14,7 @@ function Topbar() {
       <div className='flex items-center gap-1'>
         <div className='block md:hidden'>
           <SignedIn>
+            {/* signout will be visible if signed-in */}
             <SignOutButton>
               <div className='flex cursor-pointer'>
                 <Image
