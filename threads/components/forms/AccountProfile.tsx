@@ -13,6 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+
+import { isBase64Image } from "@/lib/utils";
+import { useUploadThing } from "@/lib/uploadthing";
+
+
 // zod user schema validations for react-hook-form
 import { UserValidation } from "@/lib/validations/user";
 
@@ -30,6 +35,10 @@ interface Props {
 
 const AccountProfile = ({user , btnTitle}:Props) => {
 
+    const [files , setFiles ] = useState<File[]>([]);
+    const pathname = usePathname();
+    const { startUpload } = useUploadThing("media");
+
     //react-hook-form with zod schema for user
     const form = useForm<z.infer<typeof UserValidation>>({
             resolver: zodResolver(UserValidation),
@@ -44,7 +53,19 @@ const AccountProfile = ({user , btnTitle}:Props) => {
         console.log("accountProfile ",user);
 
     const onSubmit = async (values: z.infer<typeof UserValidation>) => {
-            
+        const blob = values.profile_photo;
+
+
+        const hasImageChanged = isBase64Image(blob);
+        if (hasImageChanged) {
+            const imgRes = await startUpload(files);
+        
+            if (imgRes && imgRes[0].fileUrl) {
+                values.profile_photo = imgRes[0].fileUrl;
+            }
+        }
+
+        // Todo: update user profile
     };    
 
     const handleImage = (e: ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void ) => {
@@ -53,17 +74,21 @@ const AccountProfile = ({user , btnTitle}:Props) => {
         const fileReader = new FileReader();
     
         if (e.target.files && e.target.files.length > 0) {
-          const file = e.target.files[0];
-        //setFiles(Array.from(e.target.files));
-    
-          if (!file.type.includes("image")) return;
-    
-          fileReader.onload = async (event) => {
-            const imageDataUrl = event.target?.result?.toString() || "";
-            fieldChange(imageDataUrl);
-          };
-    
-          fileReader.readAsDataURL(file);
+            
+            const file = e.target.files[0];  //select first file
+            setFiles(Array.from(e.target.files));       
+            
+            if (!file.type.includes("image")) return; // if not an image file
+        
+            //async callback function will execute automatically after the reading gets completed
+            fileReader.onload = async (event) => {                
+                const imageDataUrl = event.target?.result?.toString() || "";  //base64 url string
+                console.log("url" , imageDataUrl);
+                
+                fieldChange(imageDataUrl); // passed the image url to onChange
+            };
+        
+            fileReader.readAsDataURL(file);  //reading the file
         }
     };    
 
@@ -84,7 +109,7 @@ const AccountProfile = ({user , btnTitle}:Props) => {
                                 <Image src='/assets/profile.svg' alt='profile_icon' width={24} height={24} className='object-contain'/>
                                 )}
                             </FormLabel>
-                            
+                                                        
                             {/* upload image */}
                             <FormControl className='flex-1 text-base-semibold text-gray-200'>
                                 <Input type='file' accept='image/*' placeholder='Add profile photo' className='account-form_image-input' onChange={(e) => handleImage(e , field.onChange)} />

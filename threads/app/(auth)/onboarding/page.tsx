@@ -19,7 +19,7 @@ async function Page() {
     image: "",
   };
 
-   
+    
 
   const userData = {
     id: user.id,
