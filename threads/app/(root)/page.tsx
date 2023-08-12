@@ -1,4 +1,11 @@
-export default function Home() {
+import { currentUser } from "@clerk/nextjs";
+
+export default async function Home() {
+  
+  const user = await currentUser();
+
+  console.log(user?.imageUrl);
+  
   return (
     <div>
       <>
