@@ -31,4 +31,17 @@ export async function updateUser({userId, bio, name, path, username, image}: Par
     } catch (error: any) {
         throw new Error(`Failed to create/update user: ${error.message}`);
     }
-  }
+}
+
+export async function fetchUser(userId: string) {
+    try {
+      connectToDB();
+  
+      const threads = await User.findOne({ id: userId })
+
+      return threads;
+
+    }catch(error : any){
+        throw new Error(`Failed to fetch user : ${error.message}`);
+    }
+}
