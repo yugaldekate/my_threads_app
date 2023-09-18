@@ -37,9 +37,9 @@ export async function fetchUser(userId: string) {
     try {
       connectToDB();
   
-      const threads = await User.findOne({ id: userId })
+      const user = await User.findOne({ id: userId })
 
-      return threads;
+      return user;
 
     }catch(error : any){
         throw new Error(`Failed to fetch user : ${error.message}`);
