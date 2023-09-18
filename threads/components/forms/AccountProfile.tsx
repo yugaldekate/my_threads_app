@@ -20,17 +20,18 @@ import { useUploadThing } from "@/lib/uploadthing";
 
 // zod user schema validations for react-hook-form
 import { UserValidation } from "@/lib/validations/user";
+import { updateUser } from "@/lib/actions/user.actions";
 
 interface Props {
     user: {
-      id: string | null;
-      objectId: string | null;
-      username: string | null;
-      name: string | null;
-      bio: string | null;
-      image: string | null;
+      id: string;
+      objectId: string;
+      username: string;
+      name: string;
+      bio: string;
+      image: string;
     };
-    btnTitle: string | null;
+    btnTitle: string;
 }
 
 const AccountProfile = ({user , btnTitle}:Props) => {
@@ -38,6 +39,7 @@ const AccountProfile = ({user , btnTitle}:Props) => {
     const [files , setFiles ] = useState<File[]>([]);
     const pathname = usePathname();
     const { startUpload } = useUploadThing("media");
+    const router = useRouter();
 
     //react-hook-form with zod schema for user
     const form = useForm<z.infer<typeof UserValidation>>({
@@ -65,7 +67,24 @@ const AccountProfile = ({user , btnTitle}:Props) => {
             }
         }
 
-        // Todo: update user profile
+        console.log("user updated called");
+        await updateUser({
+            name: values.name,
+            path: pathname,
+            username: values.username,
+            userId: user.id,
+            bio: values.bio,
+            image: values.profile_photo,
+          });
+
+          console.log("user updated completed");
+          
+      
+          if (pathname === "/profile/edit") {
+            router.back();
+          } else {
+            router.push("/");
+          }
     };    
 
     const handleImage = (e: ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void ) => {
@@ -94,7 +113,7 @@ const AccountProfile = ({user , btnTitle}:Props) => {
 
     return (
         <Form {...form}>
-            <form className='flex flex-col justify-start gap-10' onSubmit={()=>{}} >
+            <form className='flex flex-col justify-start gap-10' onSubmit={form.handleSubmit(onSubmit)} >
 
                 {/* profile picture */}
                 <FormField 
@@ -140,7 +159,7 @@ const AccountProfile = ({user , btnTitle}:Props) => {
                 {/* Username */}
                 <FormField
                     control={form.control}
-                    name='name'
+                    name='username'
                     render={({ field }) => (
                         <FormItem className='flex w-full flex-col gap-3'>
                             <FormLabel className='text-base-semibold text-light-2'> Username </FormLabel>
