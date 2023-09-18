@@ -1,10 +1,14 @@
+import { fetchPosts } from "@/lib/actions/thread.actions";
 import { currentUser } from "@clerk/nextjs";
 
 export default async function Home() {
   
   const user = await currentUser();
 
-  console.log(user?.imageUrl);
+  const result = await fetchPosts(1 , 10);
+
+  console.log(" thread data ---->", result);
+  
   
   return (
     <div>
