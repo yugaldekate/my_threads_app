@@ -13,7 +13,7 @@ export default async function Home() {
   
     return (
       <>
-        <h1 className="text-white">Homepage</h1>
+        <h1 className="head-text mb-10">Homepage</h1>
 
         <section className='mt-9 flex flex-col gap-10'>
           {result.posts.length === 0 ? (
