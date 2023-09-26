@@ -6,6 +6,8 @@ import { FilterQuery, SortOrder } from "mongoose";
 
 import User from "../models/user.model";
 import Thread from "../models/thread.model";
+import Community from "../models/community.model";
+
 import { connectToDB } from "../mongoose";
 
 interface Params {
@@ -41,6 +43,10 @@ export async function fetchUser(userId: string) {
       connectToDB();
   
       const user = await User.findOne({ id: userId })
+      .populate({
+        path: "communities",
+        model: Community,
+      });
 
       return user;
 
@@ -60,6 +66,11 @@ export async function fetchUserPosts(userId: string) {
                 model: Thread,
                 populate:[
                     {
+                        path: "community",
+                        model: Community,
+                        select: "name id image _id", // Select the "name" and "_id" fields from the "Community" model
+                    },
+                    {
                         path: "children", //for every thread find it childrens
                         model: Thread,
                         populate: {  // for every children of thread find it's author
@@ -78,7 +89,7 @@ export async function fetchUserPosts(userId: string) {
     }
 }
 
-// Almost similar to Thead (search + pagination) and Community (search + pagination)
+// Almost similar to Thread (search + pagination) and Community (search + pagination)
 export async function fetchUsers({ userId, searchString = "", pageNumber = 1, pageSize = 20, sortBy = "desc"}: {
         userId: string;
         searchString?: string;
@@ -160,4 +171,4 @@ export async function getActivity(userId: string) {
         console.error("Error fetching replies: ", error);
         throw error;
     }
-  }
+}
